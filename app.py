@@ -10,6 +10,7 @@ import os
 # pip install psycopg2-binary if app.py errors on pyscopg2
 # connection_string should be a valid db string; currently it lives in config.py
 
+# Used with context manager to create a session with the db
 session_maker = sessionmaker(bind=create_engine(connection_string))
 
 
@@ -54,6 +55,7 @@ def get_classes():
 
 
 def str_to_class(field: str):
+    '''Returns a class object type from a string input. Example : <class 'sqlalchemy.orm.decl_api.DeclarativeMeta'>'''
     try:
         identifier = getattr(sys.modules[__name__], field)
     except AttributeError:
@@ -71,7 +73,7 @@ def create_table_repr(table: Base.metadata):
     """
     attrs = table.__table__.columns.keys()
 
-    with open(f"repr\__repr__.py", "a") as f:
+    with open(f"__repr__.py", "a") as f:
 
         f.write("def __repr__(self):\n")  # This writes the function def
         f.write(
@@ -94,6 +96,7 @@ def create_table_repr(table: Base.metadata):
 
 
 def create_all_tables_repr():
+    '''Given models.py iterate over every table class and generate/write a __repr__ method to __repr__.py'''
 
     classes = get_classes()
     output_classes = list(map(str_to_class, classes))
@@ -127,17 +130,7 @@ def get_company_users(company_id):
 
 # generate_models('test')
 # get_table_attr(User)
-# print(get_all_tables())
-# print(type(User))
-# create_table_repr(User)
-
-# create_all_tables_repr()
-
 # get_company_users(18)
 
-# classes = get_classes()
-# print(type(classes))
-
-# str_to_class('User')
-
 create_all_tables_repr()
+
