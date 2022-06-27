@@ -1,61 +1,47 @@
 from models import *
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
-from typing import List
+from typing import List, Tuple
 from config import connection_string
 import sys
 import types
-import os
+
 
 # pip install psycopg2-binary if app.py errors on pyscopg2
-# connection_string should be a valid db string; currently it lives in config.py
 
 # Used with context manager to create a session with the db
 session_maker = sessionmaker(bind=create_engine(connection_string))
 
-
-def generate_models(models_file_name: str):
-    """
-    Utilizes sqlacodegen tool to read the structure of an existing database
-    and generates the appropriate SQLAlchemy model code, using the delcarative style if possible.
-    https://pypi.org/project/sqlacodegen/
-    """
-    os.system(
-        f"sqlacodegen {connection_string} --noviews --outfile {models_file_name}.py"
-    )
+###################################################
+#    TO GENERATE MODELS, RUN CREATE_MODELS.PY     #
+###################################################
 
 
-def get_table_attr(table):
+def get_table_attr(table) -> List[str]:
     """Returns table information."""
     with session_maker() as session:
         columns = session.query(table)
         print(columns.column_descriptions)
 
+    return [col for col in columns]
 
-def get_all_tables() -> List:
+
+def get_all_tables() -> List[str]:
     """Returns a list of all tables from the database."""
     tables = metadata.tables.keys()
-    _tables = []  # Lazy list
 
-    for _table in tables:
-        _tables.append(_table)
+    return [table for table in tables]
 
-    return _tables
-
-
-def get_classes():
+def get_classes() -> List[object]:
     """Returns a list of code model objects"""
     import models
     from inspect import isclass
 
-    classes = [x for x in dir(models) if isclass(getattr(models, x))]
-    print(classes[1:])
-
-    return classes[1:]
+    return [x for x in dir(models) if isclass(getattr(models, x))][1:]
 
 
 def str_to_class(field: str):
-    '''Returns a class object type from a string input. Example : <class 'sqlalchemy.orm.decl_api.DeclarativeMeta'>'''
+    """Returns a class object type from a string input. Example : <class 'sqlalchemy.orm.decl_api.DeclarativeMeta'>"""
     try:
         identifier = getattr(sys.modules[__name__], field)
     except AttributeError:
@@ -66,7 +52,7 @@ def str_to_class(field: str):
     raise TypeError("%s is not a class." % field)
 
 
-def create_table_repr(table: Base.metadata):
+def create_table_repr(table) -> None:
     """
     Writes a __repr__ dunder method to add to DB models.
     This will help with string representation of returned information.
@@ -83,7 +69,7 @@ def create_table_repr(table: Base.metadata):
         print(
             "------------------------------------------------------------------\n"
             + table.__table__.name
-            +"\n------------------------------------------------------------------"
+            + "\n------------------------------------------------------------------"
         )
 
         for attr in attrs:
@@ -95,8 +81,8 @@ def create_table_repr(table: Base.metadata):
         f.write("\n")
 
 
-def create_all_tables_repr():
-    '''Given models.py iterate over every table class and generate/write a __repr__ method to __repr__.py'''
+def create_all_tables_repr() -> None:
+    """Given models.py iterate over every table class and generate/write a __repr__ method to __repr__.py"""
 
     classes = get_classes()
     output_classes = list(map(str_to_class, classes))
@@ -112,7 +98,7 @@ def create_all_tables_repr():
             print("Error in create_all_table_repr")
 
 
-def get_company_users(company_id):
+def get_company_users(company_id) -> List[Tuple[str,str]]:
     """Example usage of ORM querying a User table based on a company ID"""
     with session_maker() as session:
         user_records = (
@@ -122,15 +108,24 @@ def get_company_users(company_id):
             .all()
         )
 
-        for user, relationship in user_records:
-            print(f"Name : {user.name}\n" + f"Company ID: {relationship.company_id}\n")
+        # for user, relationship in user_records:
+        #     print(f"Name : {user.name}\n" + f"Company ID: {relationship.company_id}\n")
 
-    return user_records
+    # return user_records
+    return [(x.name, y.company_id) for x, y in user_records]
 
 
-# generate_models('test')
 # get_table_attr(User)
+
 # get_company_users(18)
 
-create_all_tables_repr()
 
+# create_all_tables_repr()
+
+# classes = get_classes()
+
+# tables = get_all_tables()
+
+# get_table_attr(Company)
+
+# print(get_classes())
