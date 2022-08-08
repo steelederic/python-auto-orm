@@ -107,25 +107,4 @@ def get_company_users(company_id) -> List[Tuple[str,str]]:
             .where(Relationship.company_id == company_id)
             .all()
         )
-
-        # for user, relationship in user_records:
-        #     print(f"Name : {user.name}\n" + f"Company ID: {relationship.company_id}\n")
-
-    # return user_records
     return [(x.name, y.company_id) for x, y in user_records]
-
-
-# get_table_attr(User)
-
-# get_company_users(18)
-
-
-# create_all_tables_repr()
-
-# classes = get_classes()
-
-# tables = get_all_tables()
-
-# get_table_attr(Company)
-
-# print(get_classes())
