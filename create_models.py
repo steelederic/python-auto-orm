@@ -1,5 +1,14 @@
-import os
 import subprocess
-from config import connection_string
+from urllib.parse import urlsplit
+import subprocess
 
-subprocess.run(f"sqlacodegen {connection_string} --noviews --outfile models.py", capture_output=True)
+connection_string = ""
+parsed = urlsplit(connection_string)
+
+username = parsed.username
+password = parsed.password
+host = parsed.hostname
+port = parsed.port
+database = parsed.path[1:]
+
+subprocess.run(f"sqlacodegen postgresql://{username}:{password}@{host}/{database} --noviews --outfile models.py", shell=True)
