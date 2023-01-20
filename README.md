@@ -11,5 +11,6 @@ With Python 3 installed:
 Clone Repo
 Create a virtual environment
 pip install -r requirements.txt
+run create_models.py with a DB connection string to generate model code
 run app.py
 ```
